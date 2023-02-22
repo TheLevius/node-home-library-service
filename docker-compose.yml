@@ -1,0 +1,36 @@
+version: "3.9"
+services:
+  app:
+    container_name: app
+    build: .
+    ports:
+      - ${PORT}:${PORT}
+    depends_on:
+      - postgres15
+    environment:
+      PORT: ${PORT}
+    volumes:
+      - ./src:/app/src     
+    networks:
+      - docker_network
+    restart: always
+
+  postgres15:
+    container_name: postgres15
+    build: ./db/
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_vol:/var/lib/postgresql/data/
+    networks:
+      - docker_network
+    restart: always
+    command: ["postgres", "-c", "logging_collector=on", "-c", "log_directory=./db_logs", "-c", "log_filename=postgresql.log", "-c", "log_statement=all"]
+
+
+volumes:
+  postgres_vol:
+networks:
+  docker_network:
