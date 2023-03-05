@@ -1,0 +1,45 @@
+version: "3.9"
+services:
+  app:
+    container_name: app
+    build: .
+    ports:
+      - ${PORT}:${PORT}
+    depends_on:
+      - postgres15
+    environment:
+      PORT: ${PORT}
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_SECRET_REFRESH_KEY: ${JWT_SECRET_REFRESH_KEY}
+      TOKEN_EXPIRE_TIME: ${TOKEN_EXPIRE_TIME}
+      TOKEN_REFRESH_EXPIRE_TIME: ${TOKEN_REFRESH_EXPIRE_TIME}
+      LOG_LEVEL: ${LOG_LEVEL}
+      MAX_LOG_FILE_SIZE: ${MAX_LOG_FILE_SIZE}
+    volumes:
+      - ./src:/app/src     
+    networks:
+      - docker_network
+    restart: always
+
+  postgres15:
+    container_name: postgres15
+    build: ./db/
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_vol:/var/lib/postgresql/data/
+    networks:
+      - docker_network
+    restart: always
+    command: ["postgres", "-c", "logging_collector=on", "-c", "log_directory=./db_logs", "-c", "log_filename=postgresql.log", "-c", "log_statement=all"]
+
+
+volumes:
+  postgres_vol:
+networks:
+  docker_network:
